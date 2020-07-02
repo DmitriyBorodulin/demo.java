@@ -6,6 +6,7 @@ import com.widgets.example.demo.models.*;
 import com.widgets.example.demo.operations.IWidgetOperations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +25,7 @@ public class WidgetsController {
     public static final int maxPageSize = 500;
 
     @GetMapping
-    public ResponseEntity<List<ReadonlyWidget>> GetWidgets(@RequestBody(required = false) GetWidgetsViewModel viewModel)
+    public ResponseEntity<List<ReadonlyWidget>> getWidgets(@RequestBody(required = false) GetWidgetsViewModel viewModel)
             throws InvalidFilterParamsException, InvalidPaginationParamsException {
         FilterParams filterParams = null;
         PaginationParams paginationParams = null;
@@ -37,7 +38,7 @@ public class WidgetsController {
         var result = operations.getWidgets(filterParams);
         if (paginationParams != null)
         {
-            if (IsValidPaginationParams(paginationParams))
+            if (isValidPaginationParams(paginationParams))
             {
                 var newResult = new ArrayList<ReadonlyWidget>();
                 var size = result.size();
@@ -58,31 +59,44 @@ public class WidgetsController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ReadonlyWidget> GetWidget(@PathVariable UUID id)
+    public ResponseEntity<ReadonlyWidget> getWidget(@PathVariable UUID id)
     {
         return ResponseEntity.ok().body(operations.getWidget(id));
     }
 
-    private boolean IsValidPaginationParams(PaginationParams paginationParams) {
+    private boolean isValidPaginationParams(PaginationParams paginationParams) {
         return (paginationParams != null) && paginationParams.pageOffset >=0
                 && paginationParams.pageSize >=minPageSize && paginationParams.pageSize <= maxPageSize;
     }
 
     @PostMapping
-    public ReadonlyWidget AddWidget(@RequestBody Widget widget)
+    public ResponseEntity<ReadonlyWidget> addWidget(@RequestBody Widget widget)
     {
-        return operations.addWidget(widget);
+        return ResponseEntity.ok().body(operations.addWidget(widget));
     }
 
-    @PutMapping
-    public ReadonlyWidget UpdateWidget(@RequestBody Widget widget)
+    @PutMapping("/{id}")
+    public ResponseEntity<ReadonlyWidget> updateWidget(@RequestBody Widget widget, @PathVariable UUID id)
     {
-        return operations.updateWidget(widget);
+        var rWidget = operations.getWidget(id);
+        if (rWidget != null)
+        {
+            var updatedWidget = new Widget(rWidget);
+            updatedWidget.copyFrom(widget);
+            return ResponseEntity.ok(operations.updateWidget(updatedWidget));
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
     }
 
-    @DeleteMapping
-    public void RemoveWidget(@RequestBody UUID widgetId)
+    @DeleteMapping("/{id}")
+    public ResponseEntity removeWidget(@PathVariable UUID id)
     {
-        operations.removeWidget(widgetId);
+        var rWidget = operations.getWidget(id);
+        if (rWidget != null)
+        {
+            operations.removeWidget(id);
+            return ResponseEntity.ok().body(null);
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
     }
 }

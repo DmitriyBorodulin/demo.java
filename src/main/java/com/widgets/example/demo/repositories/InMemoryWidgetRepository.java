@@ -2,13 +2,16 @@ package com.widgets.example.demo.repositories;
 
 import com.widgets.example.demo.models.ReadonlyWidget;
 import com.widgets.example.demo.models.Widget;
-import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
-@Service
+@Component
+@Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class InMemoryWidgetRepository implements IWidgetRepository {
 
     private ConcurrentHashMap<UUID, ReadonlyWidget> widgets = new ConcurrentHashMap<>();

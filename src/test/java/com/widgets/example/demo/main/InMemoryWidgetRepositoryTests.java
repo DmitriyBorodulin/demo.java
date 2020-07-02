@@ -21,12 +21,12 @@ public class InMemoryWidgetRepositoryTests {
     Widget widget = new Widget(10,10,100,100,0);
 
 
-    private List<ReadonlyWidget> AddWidgetInner(Widget widget)
+    private List<ReadonlyWidget> addWidgetInner(Widget widget)
     {
         return repository.bulkUpdateWidgets(List.of(widget),null,null);
     }
 
-    private List<ReadonlyWidget> GetWidgets()
+    private List<ReadonlyWidget> getWidgets()
     {
         return Collections.list(repository.getWidgets());
     }
@@ -58,17 +58,17 @@ public class InMemoryWidgetRepositoryTests {
     }
 
     @Test
-    void shouldAddWidget() throws Exception
+    void shouldAddWidget()
     {
-        var list = AddWidgetInner(widget);
+        var list = addWidgetInner(widget);
         assertThatListIsOneElementAndEqualToWidget(list,widget,false);
-        assertThatListIsOneElementAndEqualToWidget(GetWidgets(),widget,false);
+        assertThatListIsOneElementAndEqualToWidget(getWidgets(),widget,false);
     }
 
     @Test
-    void shouldUpdateWidgetAndChangeDate() throws Exception
+    void shouldUpdateWidgetAndChangeDate()
     {
-        var list = AddWidgetInner(widget);
+        var list = addWidgetInner(widget);
         var addChangeDate = list.get(0).changeDate;
         widget = new Widget(list.get(0));
         widget.x = widget.x+10;
@@ -78,44 +78,44 @@ public class InMemoryWidgetRepositoryTests {
         list = repository.bulkUpdateWidgets(null,List.of(widget),null);
         var updateChangeDate = list.get(0).changeDate;
         assertThatListIsOneElementAndEqualToWidget(list, widget);
-        assertThatListIsOneElementAndEqualToWidget(GetWidgets(), widget);
+        assertThatListIsOneElementAndEqualToWidget(getWidgets(), widget);
         assertThat(addChangeDate.before(updateChangeDate)).as("Add date must be before update date");
     }
 
     @Test
-    void shouldAddTwoWidgetAndUpdateOneWidget() throws Exception
+    void shouldAddTwoWidgetAndUpdateOneWidget()
     {
-        AddWidgetInner(widget);
-        var list = AddWidgetInner(widget);
+        addWidgetInner(widget);
+        var list = addWidgetInner(widget);
         widget = new Widget(list.get(0));
         widget.x = widget.x+10;
         widget.y = widget.y+10;
         widget.height = widget.height+50;
         widget.width = widget.width+50;
         list = repository.bulkUpdateWidgets(null,List.of(widget),null);
-        assertThatListIsSizeOf(GetWidgets(),2);
+        assertThatListIsSizeOf(getWidgets(),2);
         assertThatListIsSizeOf(list,1);
     }
 
     @Test
-    void shouldRemoveWidget() throws Exception
+    void shouldRemoveWidget()
     {
-        var list = AddWidgetInner(widget);
+        var list = addWidgetInner(widget);
         widget = new Widget(list.get(0));
         list = repository.bulkUpdateWidgets(null,null,List.of(widget.getId()));
         assertThatListIsOneElementAndEqualToWidget(list,widget);
-        assertThatListIsSizeOf(GetWidgets(),0);
+        assertThatListIsSizeOf(getWidgets(),0);
     }
 
     @Test
-    void shouldGetWidgetAndGetWidgets() throws Exception
+    void shouldGetWidgetAndGetWidgets()
     {
-        var list = AddWidgetInner(widget);
+        var list = addWidgetInner(widget);
         var newWidget = new Widget(list.get(0));
         var getResult = repository.getWidget(list.get(0).id);
         assertThatElementsAreEqual(getResult,widget,false);
         assertThatElementsAreEqual(getResult,newWidget);
-        assertThatListIsOneElementAndEqualToWidget(GetWidgets(), newWidget);
+        assertThatListIsOneElementAndEqualToWidget(getWidgets(), newWidget);
     }
 
 }

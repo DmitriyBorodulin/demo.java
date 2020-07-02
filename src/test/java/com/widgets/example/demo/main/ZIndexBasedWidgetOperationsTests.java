@@ -34,7 +34,8 @@ public class ZIndexBasedWidgetOperationsTests {
 
     private Hashtable<UUID,ReadonlyWidget> repositoryList;
 
-    public void initMocks(){
+    public void initMocks()
+    {
         repositoryList = new Hashtable<UUID,ReadonlyWidget>();
         MockitoAnnotations.initMocks(this);
         Mockito.when(repository.getWidgets()).then(x ->{
@@ -73,7 +74,8 @@ public class ZIndexBasedWidgetOperationsTests {
     }
 
     @Test
-    public void shouldAddThreeWidgetsWithRightZIndex() throws InvalidFilterParamsException {
+    public void shouldAddThreeWidgetsWithRightZIndex() throws InvalidFilterParamsException
+    {
         initMocks();
         operations.addWidget(widget);
         operations.addWidget(widget);
@@ -86,7 +88,8 @@ public class ZIndexBasedWidgetOperationsTests {
     }
 
     @Test
-    public void shouldUpdateThreeWidgetsWithRightZIndex() throws InvalidFilterParamsException {
+    public void shouldUpdateThreeWidgetsWithRightZIndex() throws InvalidFilterParamsException
+    {
         initMocks();
         operations.addWidget(widget);
         operations.addWidget(widget);
@@ -109,7 +112,8 @@ public class ZIndexBasedWidgetOperationsTests {
     }
 
     @Test
-    public void shouldWorkWithValidFilterParams() throws InvalidFilterParamsException {
+    public void shouldWorkWithValidFilterParams() throws InvalidFilterParamsException
+    {
         initMocks();
         operations.addWidget(widget);
         operations.addWidget(widget);
@@ -122,7 +126,8 @@ public class ZIndexBasedWidgetOperationsTests {
     }
 
     @Test
-    public void shouldThrowWithInvalidFilterParamX() throws InvalidFilterParamsException {
+    public void shouldThrowWithInvalidFilterParamX() throws InvalidFilterParamsException
+    {
         initMocks();
         var filterParams = new FilterParams(widget);
         filterParams.width = -1;

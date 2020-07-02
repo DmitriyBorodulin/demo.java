@@ -16,6 +16,15 @@ public class Widget {
         this.id = widget.id;
     }
 
+    public void copyFrom(Widget widget)
+    {
+        x = widget.x;
+        y = widget.y;
+        zLevel = widget.zLevel;
+        width = widget.width;
+        height = widget.height;
+    }
+
     public Widget()
     {
         id = null;

@@ -38,7 +38,7 @@ public class WidgetsControllerIntegrationTests {
     GetWidgetsViewModel viewModel = new GetWidgetsViewModel();
     private int pageSize = 10;
 
-    private UUID AddWidgets(Widget _widget, int count)
+    private UUID addWidgets(Widget _widget, int count)
     {
         UUID result = null;
         for (int i=0;i<count;i++)
@@ -52,7 +52,7 @@ public class WidgetsControllerIntegrationTests {
         viewModel.paginationParams = paginationParams;
     }
 
-    private void CheckPagination(GetWidgetsViewModel viewModel,int expectedResultLength,int expectedPageCount) throws Exception {
+    private void checkPagination(GetWidgetsViewModel viewModel, int expectedResultLength, int expectedPageCount) throws Exception {
         var result = mockMvc.perform(
                 get("/widgets")
                         .content(objectMapper.writeValueAsString(viewModel))
@@ -79,9 +79,7 @@ public class WidgetsControllerIntegrationTests {
 
     private void checkThatThrowInvalidPaginationParams()
     {
-        assertThrows(InvalidPaginationParamsException.class,() -> {
-            controller.GetWidgets(viewModel);
-        });
+        assertThrows(InvalidPaginationParamsException.class,() -> controller.getWidgets(viewModel));
     }
 
     @Test
@@ -101,7 +99,7 @@ public class WidgetsControllerIntegrationTests {
         widget.x = widget.x+10;
         jsonContent = objectMapper.writeValueAsString(widget);
         mockMvc.perform(
-                put("/widgets")
+                put("/widgets/"+widget.getId())
                         .content(jsonContent)
                         .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isOk());
@@ -109,11 +107,8 @@ public class WidgetsControllerIntegrationTests {
         assertThat(widgets.size() == 1);
         assertThat(isEqualWidgets(widget,widgets.get(0),true));
         //Remove widget
-        jsonContent = objectMapper.writeValueAsString(widget.getId());
         mockMvc.perform(
-                delete("/widgets")
-                        .content(jsonContent)
-                        .contentType(MediaType.APPLICATION_JSON)
+                delete("/widgets/"+widgets.get(0).id)
         ).andExpect(status().isOk());
         widgets = operations.getWidgets(null);
         assertThat(widgets.size() == 0);
@@ -125,26 +120,26 @@ public class WidgetsControllerIntegrationTests {
         for (int i = 1; i < 5;i++)
         {
             widget.x = widget.x-100;
-            AddWidgets(widget,pageSize/2);
+            addWidgets(widget,pageSize/2);
         }
         //check without filters
-        CheckPagination(viewModel,pageSize,2);
+        checkPagination(viewModel,pageSize,2);
         //check with filters
         viewModel.filterParams = new FilterParams(widget);
-        CheckPagination(viewModel,pageSize/2,1);
+        checkPagination(viewModel,pageSize/2,1);
     }
 
     @Test
     public void shouldGetWidgetWork() throws Exception
     {
-        var id = AddWidgets(widget,1);
+        var id = addWidgets(widget,1);
         mockMvc.perform(
                 get("/widgets/"+id.toString())
         ).andExpect(status().isOk());
     }
 
     @Test
-    public void shouldThrowGetWidgetsWithInvalidPaginationParams() throws Exception {
+    public void shouldThrowGetWidgetsWithInvalidPaginationParams() {
         setDefaultViewModelWithPaginationParams();
 
         paginationParams.pageSize = WidgetsController.minPageSize-1;
@@ -157,6 +152,5 @@ public class WidgetsControllerIntegrationTests {
         paginationParams.pageOffset = -1;
         checkThatThrowInvalidPaginationParams();
     }
-
 
 }

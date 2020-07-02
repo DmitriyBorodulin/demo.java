@@ -8,41 +8,30 @@ import com.widgets.example.demo.repositories.InMemoryWidgetRepository;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.web.bind.annotation.RestController;
 
 @SpringBootApplication
-@RestController
 public class Application {
 
 	public static void main(String[] args) {
 		SpringApplication.run(Application.class, args);
 	}
 
-	private IWidgetRepository repository;
 	@Bean
-	public IWidgetRepository GetRepository()
+	public IWidgetRepository getRepository()
 	{
-		if (repository == null)
-			repository = new InMemoryWidgetRepository();
-		return repository;
+		return new InMemoryWidgetRepository();
 	}
 
-	private IWidgetOperations operations;
 	@Bean
-	public IWidgetOperations GetOperations()
+	public IWidgetOperations getOperations()
 	{
-		if (operations == null)
-			operations = new ZIndexBasedWidgetOperations();
-		return operations;
+		return new ZIndexBasedWidgetOperations();
 	}
 
-	private WidgetsController widgetsController;
 	@Bean
-	public WidgetsController GetWidgetsController()
+	public WidgetsController getWidgetsController()
 	{
-		if (widgetsController == null)
-			widgetsController = new WidgetsController();
-		return widgetsController;
+		return new WidgetsController();
 	}
 
 

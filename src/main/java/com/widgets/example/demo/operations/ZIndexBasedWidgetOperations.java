@@ -7,12 +7,15 @@ import com.widgets.example.demo.models.ReadonlyWidget;
 import com.widgets.example.demo.models.Widget;
 import com.widgets.example.demo.repositories.IWidgetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.lang.NonNull;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 
-@Service
+@Component
+@Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class ZIndexBasedWidgetOperations implements IWidgetOperations {
 
     @Autowired
@@ -67,7 +70,7 @@ public class ZIndexBasedWidgetOperations implements IWidgetOperations {
         return addOrUpdateWidget(widget,false);
     }
 
-    private boolean IsFiltered(ReadonlyWidget el, FilterParams filterParams)
+    private boolean isFiltered(ReadonlyWidget el, FilterParams filterParams)
     {
         if (filterParams != null)
         {
@@ -89,7 +92,7 @@ public class ZIndexBasedWidgetOperations implements IWidgetOperations {
             throw new InvalidFilterParamsException("Invalid filter params");
         var result = new ArrayList<ReadonlyWidget>();
         repository.getWidgets().asIterator().forEachRemaining(widget -> {
-            if (IsFiltered(widget,filterParams))
+            if (isFiltered(widget,filterParams))
                 result.add(widget);
         });
         Collections.sort(result,(w1,w2) -> w1.zLevel >= w2.zLevel ? 1 : -1);

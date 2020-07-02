@@ -4,6 +4,7 @@ import com.widgets.example.demo.models.ReadonlyWidget;
 import com.widgets.example.demo.models.Widget;
 
 public class CommonLogic {
+
     public static boolean isEqualWidgets(Widget widget1, ReadonlyWidget widget2, boolean isCheckId)
     {
         if (widget1 == null || widget2 == null)
