@@ -2,8 +2,6 @@ package com.widgets.example.demo.main;
 
 import com.widgets.example.demo.controllers.WidgetsController;
 import com.widgets.example.demo.operations.IZIndexBasedWidgetRepository;
-import com.widgets.example.demo.repositories.IWidgetRepository;
-import com.widgets.example.demo.repositories.InMemoryWidgetRepository;
 import com.widgets.example.demo.repositories.ZIndexBasedWidgetRepository;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -14,11 +12,6 @@ public class Application {
 
 	public static void main(String[] args) {
 		SpringApplication.run(Application.class, args);
-	}
-
-	@Bean
-	public IWidgetRepository getRepository()	{
-		return new InMemoryWidgetRepository();
 	}
 
 	@Bean
