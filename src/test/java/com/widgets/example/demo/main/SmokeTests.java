@@ -1,7 +1,7 @@
 package com.widgets.example.demo.main;
 
 import com.widgets.example.demo.controllers.WidgetsController;
-import com.widgets.example.demo.operations.IWidgetOperations;
+import com.widgets.example.demo.operations.IZIndexBasedWidgetRepository;
 import com.widgets.example.demo.repositories.IWidgetRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +19,7 @@ class SmokeTests {
 	IWidgetRepository repository;
 
 	@Autowired
-	IWidgetOperations operations;
+    IZIndexBasedWidgetRepository operations;
 
 	@Test
 	void contextLoads() throws Exception {

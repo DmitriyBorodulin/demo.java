@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.UUID;
 
 
-public interface IWidgetOperations {
-    void removeWidget(UUID widgetId);
+public interface IZIndexBasedWidgetRepository {
+    ReadonlyWidget removeWidget(UUID widgetId);
     ReadonlyWidget addWidget(Widget widget);
     ReadonlyWidget updateWidget(Widget widget);
     List<ReadonlyWidget> getWidgets(FilterParams filterParams ) throws InvalidFilterParamsException;

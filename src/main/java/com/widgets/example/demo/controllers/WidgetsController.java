@@ -2,8 +2,11 @@ package com.widgets.example.demo.controllers;
 
 import com.widgets.example.demo.exceptions.InvalidFilterParamsException;
 import com.widgets.example.demo.exceptions.InvalidPaginationParamsException;
-import com.widgets.example.demo.models.*;
-import com.widgets.example.demo.operations.IWidgetOperations;
+import com.widgets.example.demo.models.FilterParams;
+import com.widgets.example.demo.models.PaginationParams;
+import com.widgets.example.demo.models.ReadonlyWidget;
+import com.widgets.example.demo.models.Widget;
+import com.widgets.example.demo.operations.IZIndexBasedWidgetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -19,20 +22,42 @@ import java.util.UUID;
 public class WidgetsController {
 
     @Autowired
-    private IWidgetOperations operations;
+    private IZIndexBasedWidgetRepository operations;
     public static final String PageCountHeaderName = "DEMO_PAGE_COUNT";
     public static final int minPageSize = 10;
     public static final int maxPageSize = 500;
 
     @GetMapping
-    public ResponseEntity<List<ReadonlyWidget>> getWidgets(@RequestBody(required = false) GetWidgetsViewModel viewModel)
+    public ResponseEntity<List<ReadonlyWidget>> getWidgets(Integer pageSize,
+                                                           Integer pageOffset,
+                                                           Long filterX,
+                                                           Long filterY,
+                                                           Long filterWidth,
+                                                           Long filterHeight)
             throws InvalidFilterParamsException, InvalidPaginationParamsException {
         FilterParams filterParams = null;
         PaginationParams paginationParams = null;
-        if (viewModel != null)
+        if (filterX != null || filterY != null || filterWidth != null || filterHeight != null) {
+            if (filterX != null && filterY != null && filterWidth != null && filterHeight != null) {
+                filterParams = new FilterParams();
+                filterParams.x = filterX;
+                filterParams.y = filterY;
+                filterParams.width = filterWidth;
+                filterParams.height = filterHeight;
+            }
+            else
+                throw new InvalidFilterParamsException("All or none params for filter must be set");
+        }
+        if (pageSize != null || pageOffset != null)
         {
-            filterParams = viewModel.filterParams;
-            paginationParams = viewModel.paginationParams;
+            if (pageSize != null && pageOffset != null)
+            {
+                paginationParams = new PaginationParams();
+                paginationParams.pageOffset = pageOffset;
+                paginationParams.pageSize = pageSize;
+            }
+            else
+                throw new InvalidPaginationParamsException("All or none params for pagination must be set");
         }
         HttpHeaders responseHeaders = new HttpHeaders();
         var result = operations.getWidgets(filterParams);

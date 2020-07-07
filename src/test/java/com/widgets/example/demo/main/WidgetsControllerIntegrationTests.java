@@ -4,13 +4,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.widgets.example.demo.controllers.WidgetsController;
 import com.widgets.example.demo.exceptions.InvalidPaginationParamsException;
 import com.widgets.example.demo.models.*;
-import com.widgets.example.demo.operations.IWidgetOperations;
+import com.widgets.example.demo.operations.IZIndexBasedWidgetRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.UUID;
 
@@ -27,7 +31,7 @@ public class WidgetsControllerIntegrationTests {
     private MockMvc mockMvc;
 
     @Autowired
-    private IWidgetOperations operations;
+    private IZIndexBasedWidgetRepository operations;
 
     @Autowired
     private WidgetsController controller;
@@ -35,7 +39,6 @@ public class WidgetsControllerIntegrationTests {
     Widget widget = new Widget(10,10,100,100,0);
     ObjectMapper objectMapper = new ObjectMapper();
     PaginationParams paginationParams = new PaginationParams();
-    GetWidgetsViewModel viewModel = new GetWidgetsViewModel();
     private int pageSize = 10;
 
     private UUID addWidgets(Widget _widget, int count)
@@ -46,24 +49,40 @@ public class WidgetsControllerIntegrationTests {
         return result;
     }
 
-    private void setDefaultViewModelWithPaginationParams()
+    private void setDefaults()
     {
         paginationParams.pageSize = pageSize;
-        viewModel.paginationParams = paginationParams;
     }
 
-    private void checkPagination(GetWidgetsViewModel viewModel, int expectedResultLength, int expectedPageCount) throws Exception {
+    private void checkPagination(PaginationParams paginationParams, int expectedResultLength, int expectedPageCount) throws Exception
+    {
+        checkPagination(paginationParams,null,expectedResultLength,expectedPageCount);
+    }
+
+    private void checkPagination(PaginationParams paginationParams, FilterParams filterParams, int expectedResultLength, int expectedPageCount) throws Exception {
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+        if (paginationParams != null)
+        {
+            params.add("pageOffset",Long.toString(paginationParams.pageOffset));
+            params.add("pageSize",Long.toString(paginationParams.pageSize));
+        }
+        if (filterParams != null)
+        {
+            params.add("filterHeight",Long.toString(filterParams.height));
+            params.add("filterWidth",Long.toString(filterParams.width));
+            params.add("filterX",Long.toString(filterParams.x));
+            params.add("filterY",Long.toString(filterParams.y));
+        }
+        UriComponents uriComponents =     UriComponentsBuilder.fromPath("/widgets").queryParams(params).build();
         var result = mockMvc.perform(
-                get("/widgets")
-                        .content(objectMapper.writeValueAsString(viewModel))
-                        .contentType(MediaType.APPLICATION_JSON)
+                get(uriComponents.toUriString())
         ).andExpect(status().isOk());
         result.andExpect(mvcResult ->
         {
-            var responce = mvcResult.getResponse();
-            var isValidHeader = responce.containsHeader(WidgetsController.PageCountHeaderName);
+            var response = mvcResult.getResponse();
+            var isValidHeader = response.containsHeader(WidgetsController.PageCountHeaderName);
             if (isValidHeader)
-                isValidHeader = responce.getHeader(WidgetsController.PageCountHeaderName).equals(Integer.toString(expectedPageCount));
+                isValidHeader = response.getHeader(WidgetsController.PageCountHeaderName).equals(Integer.toString(expectedPageCount));
             assertThat(isValidHeader).isTrue();
         });
         result.andExpect(mvcResult ->
@@ -79,7 +98,8 @@ public class WidgetsControllerIntegrationTests {
 
     private void checkThatThrowInvalidPaginationParams()
     {
-        assertThrows(InvalidPaginationParamsException.class,() -> controller.getWidgets(viewModel));
+        assertThrows(InvalidPaginationParamsException.class,() -> controller.getWidgets(
+                paginationParams.pageSize,paginationParams.pageOffset,null,null,null,null));
     }
 
     @Test
@@ -116,17 +136,17 @@ public class WidgetsControllerIntegrationTests {
 
     @Test
     public void shouldGetWidgetsWorkWithPagination() throws Exception {
-        setDefaultViewModelWithPaginationParams();
+        setDefaults();
         for (int i = 1; i < 5;i++)
         {
             widget.x = widget.x-100;
             addWidgets(widget,pageSize/2);
         }
         //check without filters
-        checkPagination(viewModel,pageSize,2);
+        checkPagination(paginationParams,pageSize,2);
         //check with filters
-        viewModel.filterParams = new FilterParams(widget);
-        checkPagination(viewModel,pageSize/2,1);
+        var filterParams = new FilterParams(widget);
+        checkPagination(paginationParams,filterParams,pageSize/2,1);
     }
 
     @Test
@@ -140,7 +160,7 @@ public class WidgetsControllerIntegrationTests {
 
     @Test
     public void shouldThrowGetWidgetsWithInvalidPaginationParams() {
-        setDefaultViewModelWithPaginationParams();
+        setDefaults();
 
         paginationParams.pageSize = WidgetsController.minPageSize-1;
         checkThatThrowInvalidPaginationParams();

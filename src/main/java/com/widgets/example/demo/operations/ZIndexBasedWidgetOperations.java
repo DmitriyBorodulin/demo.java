@@ -16,14 +16,14 @@ import java.util.*;
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
-public class ZIndexBasedWidgetOperations implements IWidgetOperations {
+public class ZIndexBasedWidgetOperations implements IZIndexBasedWidgetRepository {
 
     @Autowired
     private IWidgetRepository repository;
 
     @Override
-    public void removeWidget(@NonNull UUID widgetId) {
-        repository.bulkUpdateWidgets(null, null, List.of(widgetId));
+    public ReadonlyWidget removeWidget(@NonNull UUID widgetId) {
+        return repository.bulkUpdateWidgets(null, null, List.of(widgetId)).get(0);
     }
 
     private ReadonlyWidget addOrUpdateWidget(Widget widget, boolean isAdd)

@@ -14,7 +14,7 @@ import java.util.concurrent.locks.ReentrantLock;
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class InMemoryWidgetRepository implements IWidgetRepository {
 
-    private ConcurrentHashMap<UUID, ReadonlyWidget> widgets = new ConcurrentHashMap<>();
+    private volatile ConcurrentHashMap<UUID, ReadonlyWidget> widgets = new ConcurrentHashMap<>();
     private final ReentrantLock updateLock = new ReentrantLock();
 
     @Override

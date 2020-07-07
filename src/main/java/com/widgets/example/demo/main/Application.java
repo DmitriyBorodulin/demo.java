@@ -1,10 +1,10 @@
 package com.widgets.example.demo.main;
 
 import com.widgets.example.demo.controllers.WidgetsController;
-import com.widgets.example.demo.operations.IWidgetOperations;
-import com.widgets.example.demo.operations.ZIndexBasedWidgetOperations;
+import com.widgets.example.demo.operations.IZIndexBasedWidgetRepository;
 import com.widgets.example.demo.repositories.IWidgetRepository;
 import com.widgets.example.demo.repositories.InMemoryWidgetRepository;
+import com.widgets.example.demo.repositories.ZIndexBasedWidgetRepository;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -17,20 +17,17 @@ public class Application {
 	}
 
 	@Bean
-	public IWidgetRepository getRepository()
-	{
+	public IWidgetRepository getRepository()	{
 		return new InMemoryWidgetRepository();
 	}
 
 	@Bean
-	public IWidgetOperations getOperations()
-	{
-		return new ZIndexBasedWidgetOperations();
+	public IZIndexBasedWidgetRepository getOperations()	{
+		return new ZIndexBasedWidgetRepository();
 	}
 
 	@Bean
-	public WidgetsController getWidgetsController()
-	{
+	public WidgetsController getWidgetsController()	{
 		return new WidgetsController();
 	}
 
