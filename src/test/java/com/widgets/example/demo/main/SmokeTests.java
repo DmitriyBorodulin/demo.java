@@ -1,7 +1,7 @@
 package com.widgets.example.demo.main;
 
 import com.widgets.example.demo.controllers.WidgetsController;
-import com.widgets.example.demo.operations.IZIndexBasedWidgetRepository;
+import com.widgets.example.demo.repositories.IZIndexBasedWidgetRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

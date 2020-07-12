@@ -4,8 +4,9 @@ import com.widgets.example.demo.exceptions.InvalidFilterParamsException;
 import com.widgets.example.demo.models.FilterParams;
 import com.widgets.example.demo.models.ReadonlyWidget;
 import com.widgets.example.demo.models.Widget;
-import com.widgets.example.demo.operations.IZIndexBasedWidgetRepository;
+import org.springframework.stereotype.Component;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -15,9 +16,10 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 
-public class ZIndexBasedWidgetRepository implements IZIndexBasedWidgetRepository {
+@Component
+public class ZIndexBasedInMemoryWidgetRepository extends ZIndexBaseWidgetRepository implements IZIndexBasedWidgetRepository {
 
-    private volatile InnerStore store = new InnerStore(new ConcurrentHashMap<UUID,ReadonlyWidget>(),new ConcurrentSkipListMap<Long,ReadonlyWidget>());
+    private volatile InnerStore store = new InnerStore(new ConcurrentHashMap<>(), new ConcurrentSkipListMap<>());
 
     private ConcurrentHashMap<UUID,ReadonlyWidget> newWidgetsById = null;
     private ConcurrentSkipListMap<Long,ReadonlyWidget> newWidgetsByZIndex = null;
@@ -25,12 +27,12 @@ public class ZIndexBasedWidgetRepository implements IZIndexBasedWidgetRepository
     private final ReentrantLock updateLock = new ReentrantLock();
 
     private ReadonlyWidget execBlockingOperation(Function<Widget,ReadonlyWidget> func, Widget widget)    {
-        ReadonlyWidget result = null;
+        ReadonlyWidget result;
         try
         {
             updateLock.lock();
-            newWidgetsById = new ConcurrentHashMap<UUID,ReadonlyWidget>(store.widgetsById);
-            newWidgetsByZIndex = new ConcurrentSkipListMap<Long,ReadonlyWidget>(store.widgetsByZIndex);
+            newWidgetsById = new ConcurrentHashMap<>(store.widgetsById);
+            newWidgetsByZIndex = new ConcurrentSkipListMap<>(store.widgetsByZIndex);
             result = func.apply(widget);
             store = new InnerStore(newWidgetsById,newWidgetsByZIndex);
         }
@@ -102,17 +104,13 @@ public class ZIndexBasedWidgetRepository implements IZIndexBasedWidgetRepository
     @Override
     public ReadonlyWidget addWidget(Widget widget) {
         return execBlockingOperation((w) ->
-        {
-            return updateOrAddWidget(w,true);
-        },widget);
+                updateOrAddWidget(w,true),widget);
     }
 
     @Override
     public ReadonlyWidget updateWidget(Widget widget) {
         return execBlockingOperation((w) ->
-        {
-            return updateOrAddWidget(w,false);
-        },widget);
+                updateOrAddWidget(w,false),widget);
     }
 
     private boolean IsFilterParamsValid(FilterParams params)    {
@@ -131,9 +129,8 @@ public class ZIndexBasedWidgetRepository implements IZIndexBasedWidgetRepository
     }
 
     @Override
-    public List<ReadonlyWidget> getWidgets(FilterParams filterParams) throws InvalidFilterParamsException {
-        if (!IsFilterParamsValid(filterParams))
-            throw new InvalidFilterParamsException("Invalid filter params");
+    public List<ReadonlyWidget> getWidgets(FilterParams filterParams) throws InvalidFilterParamsException, SQLException {
+        super.getWidgets(filterParams);
         if (filterParams == null)
             return List.copyOf(store.widgetsByZIndex.values());
         var result = new ArrayList<ReadonlyWidget>();

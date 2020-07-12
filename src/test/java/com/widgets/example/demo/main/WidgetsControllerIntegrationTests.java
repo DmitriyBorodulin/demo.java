@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.widgets.example.demo.controllers.WidgetsController;
 import com.widgets.example.demo.exceptions.InvalidPaginationParamsException;
 import com.widgets.example.demo.models.*;
-import com.widgets.example.demo.operations.IZIndexBasedWidgetRepository;
+import com.widgets.example.demo.repositories.IZIndexBasedWidgetRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -16,6 +16,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.sql.SQLException;
 import java.util.UUID;
 
 import static com.widgets.example.demo.main.CommonLogic.isEqualWidgets;
@@ -41,8 +42,7 @@ public class WidgetsControllerIntegrationTests {
     PaginationParams paginationParams = new PaginationParams();
     private int pageSize = 10;
 
-    private UUID addWidgets(Widget _widget, int count)
-    {
+    private UUID addWidgets(Widget _widget, int count) throws SQLException {
         UUID result = null;
         for (int i=0;i<count;i++)
             result = operations.addWidget(_widget).id;
@@ -60,7 +60,7 @@ public class WidgetsControllerIntegrationTests {
     }
 
     private void checkPagination(PaginationParams paginationParams, FilterParams filterParams, int expectedResultLength, int expectedPageCount) throws Exception {
-        MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         if (paginationParams != null)
         {
             params.add("pageOffset",Long.toString(paginationParams.pageOffset));

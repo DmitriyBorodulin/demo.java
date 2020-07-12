@@ -6,13 +6,14 @@ import com.widgets.example.demo.models.FilterParams;
 import com.widgets.example.demo.models.PaginationParams;
 import com.widgets.example.demo.models.ReadonlyWidget;
 import com.widgets.example.demo.models.Widget;
-import com.widgets.example.demo.operations.IZIndexBasedWidgetRepository;
+import com.widgets.example.demo.repositories.IZIndexBasedWidgetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -34,7 +35,7 @@ public class WidgetsController {
                                                            Long filterY,
                                                            Long filterWidth,
                                                            Long filterHeight)
-            throws InvalidFilterParamsException, InvalidPaginationParamsException {
+            throws InvalidFilterParamsException, InvalidPaginationParamsException, SQLException {
         FilterParams filterParams = null;
         PaginationParams paginationParams = null;
         if (filterX != null || filterY != null || filterWidth != null || filterHeight != null) {
@@ -84,8 +85,7 @@ public class WidgetsController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ReadonlyWidget> getWidget(@PathVariable UUID id)
-    {
+    public ResponseEntity<ReadonlyWidget> getWidget(@PathVariable UUID id) throws SQLException {
         return ResponseEntity.ok().body(operations.getWidget(id));
     }
 
@@ -95,14 +95,12 @@ public class WidgetsController {
     }
 
     @PostMapping
-    public ResponseEntity<ReadonlyWidget> addWidget(@RequestBody Widget widget)
-    {
+    public ResponseEntity<ReadonlyWidget> addWidget(@RequestBody Widget widget) throws SQLException {
         return ResponseEntity.ok().body(operations.addWidget(widget));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ReadonlyWidget> updateWidget(@RequestBody Widget widget, @PathVariable UUID id)
-    {
+    public ResponseEntity<ReadonlyWidget> updateWidget(@RequestBody Widget widget, @PathVariable UUID id) throws SQLException {
         var rWidget = operations.getWidget(id);
         if (rWidget != null)
         {
@@ -114,8 +112,7 @@ public class WidgetsController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity removeWidget(@PathVariable UUID id)
-    {
+    public ResponseEntity removeWidget(@PathVariable UUID id) throws SQLException {
         var rWidget = operations.getWidget(id);
         if (rWidget != null)
         {
